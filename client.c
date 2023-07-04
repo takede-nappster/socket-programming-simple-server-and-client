@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 
 #include <string.h>
+#include "lib/client/client.h"
 
 int main(int argc, char *argv[]) {
     int sockfd, portno, n;
@@ -43,8 +44,13 @@ int main(int argc, char *argv[]) {
         printf("What do you want to say? ");
         bzero(buffer,256);
         scanf("%s", buffer);
+        Client client;
 
-        n = write(sockfd,buffer,strlen(buffer));
+        EncryptedResult result;
+
+        encrypt_message(client, buffer, &result);
+
+        n = write(sockfd,result.encrypted_message,result.encrypted_length);
 
         if (n < 0){
             perror("ERROR while writing to socket");

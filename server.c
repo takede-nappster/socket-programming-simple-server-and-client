@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include "lib/server/server.h"
 
 void bzero(void *a, size_t n) {
     memset(a, 0, n);
@@ -37,6 +38,11 @@ int main( int argc, char *argv[] ) {
 
     const uint16_t port_number = 5001;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    KeyPair keyPair = generateKeyPair();
+
+    printf("Clé publique :\n%s\n", keyPair.publicKey);
+    printf("Clé privée :\n%s\n", keyPair.privateKey);
 
     struct sockaddr_in *server_sockaddr = init_sockaddr_in(port_number);
     struct sockaddr_in *client_sockaddr = malloc(sizeof(struct sockaddr_in));
@@ -105,6 +111,12 @@ int main( int argc, char *argv[] ) {
 
                 printf("Process %d: ", getpid());
                 printf("Received `%s`. Processing... ", buffer);
+
+                /*
+                    int decryptedSize = 0;
+                    unsigned char* decryptedMessage = decryptMessage(encryptedMessage, keyPair.privateKey, encryptedSize, &decryptedSize);
+                    printf("Message déchiffré :\n%s\n", decryptedMessage);
+                */
 
                 free(response);
                 response = process_operation(buffer);
