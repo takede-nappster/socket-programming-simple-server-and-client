@@ -22,16 +22,15 @@ void encrypt_message(Client client, const char *message, EncryptedResult * resul
 
     encrypted_length = RSA_public_encrypt(message_length, (unsigned char *)message, encrypted_message, rsa_public, RSA_PKCS1_PADDING);
 
-    printf("Message chiffré (en hexadécimal):\n");
+    /*printf("Message chiffré (en hexadécimal):\n");
     for (int i = 0; i < encrypted_length; i++) {
         printf("%02x", encrypted_message[i]);
     }
-    printf("\n");
+    printf("\n");*/
 
 
     RSA_free(rsa_public);
-    //free(encrypted_message);
     result->encrypted_length = encrypted_length;
-    result->encrypted_message = &encrypted_message;
+    result->encrypted_message = encrypted_message;
     
 }

@@ -1,0 +1,13 @@
+Etape 1 : Compilation
+$ make
+
+Etape 2 : Lancement du serveur dans un terminal
+$ ./server
+
+Etape 3 : Copier la clé publique dans un fichier key.txt
+
+Etape 4 : Lancer le client
+$ ./client -f key.txt
+
+Etape 5 : Ecrire des messages au niveau du terminal client,
+puis vérifier la réception et le déchiffrage au niveau du serveur

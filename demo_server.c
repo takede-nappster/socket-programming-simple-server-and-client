@@ -39,10 +39,8 @@ int main( int argc, char *argv[] ) {
     const uint16_t port_number = 5001;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
-    KeyPair keyPair = generateKeyPair();
-
-    printf("Clé publique :\n%s\n", keyPair.publicKey);
-    printf("Clé privée :\n%s\n", keyPair.privateKey);
+    printf("### Serveur  ### \n");
+    printf("# Démarrage en cours ...\n");
 
     struct sockaddr_in *server_sockaddr = init_sockaddr_in(port_number);
     struct sockaddr_in *client_sockaddr = malloc(sizeof(struct sockaddr_in));
@@ -60,15 +58,23 @@ int main( int argc, char *argv[] ) {
         printf("Error! Can't listen\n");
         exit(0);
     }
-
-
     const size_t buffer_len = 256;
-    char *buffer = malloc(buffer_len * sizeof(char));
+    unsigned char *buffer = malloc(buffer_len * sizeof(char));
     char *response = NULL;
     time_t last_operation;
     __pid_t pid = -1;
+    printf("# Démarrage terminé ...\n");
+    printf("# Génération de la paire de clé en cours ... \n");
+    KeyPair keyPair = generateKeyPair();
+    printf("Clé publique :\n%s\n", keyPair.publicKey);
+    printf("Clé privée :\n%s\n", keyPair.privateKey);
+
 
     while (1) {
+        if (pid == -1) 
+            printf("# En attente d'une nouvelle connexion (Ctrl+C pour quitter) ...\n\n");
+        else
+            printf("# En attente de message (Ctrl+C pour quitter) ... \n\n");
         int client_fd = accept(server_fd, (struct sockaddr *) &client_sockaddr, &client_socklen);
 
         pid = fork();
@@ -80,17 +86,17 @@ int main( int argc, char *argv[] ) {
                 exit(0);
             }
 
-            printf("Connection with `%d` has been established and delegated to the process %d.\nWaiting for a query...\n", client_fd, getpid());
+            printf("# Connexion établie ...\n");
+            printf("# En attente de message (Ctrl+C pour quitter) ... \n");
 
             last_operation = clock();
 
             while (1) {
                 read(client_fd, buffer, buffer_len);
 
-                if (buffer == "close") {
-                    printf("Process %d: ", getpid());
+                if (buffer == "__close__") {
                     close(client_fd);
-                    printf("Closing session with `%d`. Bye!\n", client_fd);
+                    printf("# Fermeture de la session. Bye!\n", client_fd);
                     break;
                 }
 
@@ -108,22 +114,33 @@ int main( int argc, char *argv[] ) {
 
                     continue;
                 }
+                printf("# Message chiffré reçu : \n");
+                printf("==== Message chiffré ==== \n");
+                for (int i = 0; i < 256; i++)
+                {
+                    printf("%02x", buffer[i]);
+                }
 
-                printf("Process %d: ", getpid());
-                printf("Received `%s`. Processing... ", buffer);
+                printf("\n==== Message chiffré ==== \n");
+                printf("# Déchiffrement en cours ... \n");
+                int decryptedSize;
+                unsigned char* decryptedMessage = decryptMessage(buffer, keyPair.privateKey, 256, &decryptedSize);
+                printf("# Déchiffrement terminé ...");
+                printf("# Le message en claire est le suivant : \n");
+                printf("==== Message clair ==== \n");
+                printf("\n%s\n", decryptedMessage);
+                printf("\n==== Message clair ==== \n\n");
+                printf("# Fin du traitement ..\n\n");
+                printf("# En attente de nouveau messages ...\n\n");
 
-                /*
-                    int decryptedSize = 0;
-                    unsigned char* decryptedMessage = decryptMessage(encryptedMessage, keyPair.privateKey, encryptedSize, &decryptedSize);
-                    printf("Message déchiffré :\n%s\n", decryptedMessage);
-                */
 
                 free(response);
-                response = process_operation(buffer);
+                //response = process_operation(buffer);
+                response = "OK";
                 bzero(buffer, buffer_len * sizeof(char));
 
                 send(client_fd, response, strlen(response), 0);
-                printf("Responded with `%s`. Waiting for a new query...\n", response);
+                //printf("Responded with `%s`. Waiting for a new query...\n", response);
 
                 last_operation = clock();
             }

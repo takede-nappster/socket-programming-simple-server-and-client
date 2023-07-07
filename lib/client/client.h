@@ -8,7 +8,7 @@ typedef struct {
 typedef struct 
 {
     int encrypted_length;
-    char * * encrypted_message;
+    unsigned char * encrypted_message;
 } EncryptedResult;
 
 
