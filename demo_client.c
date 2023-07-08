@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     {
         printf("Entrer votre message : ");
         bzero(buffer, 256);
-        scanf("%s", buffer);
+        scanf("%[^\n]%*c", buffer);
 
         EncryptedResult result;
 
@@ -135,8 +135,6 @@ int main(int argc, char *argv[])
             perror("ERROR while reading from socket");
             exit(1);
         }
-
-        printf("# réponse serveur %s \n", buffer);
 
         if(strcmp(buffer, "OK") == 0) {
             printf("# Envoie terminé ... \n\n");
